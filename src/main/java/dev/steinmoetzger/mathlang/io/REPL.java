@@ -72,6 +72,7 @@ public class REPL {
                     Tokenizer tokenizer = new Tokenizer(line);
                     System.out.println(tokenizer.next());
                     System.out.println(tokenizer.next());
+                    System.out.println(tokenizer.next());
 
 
 

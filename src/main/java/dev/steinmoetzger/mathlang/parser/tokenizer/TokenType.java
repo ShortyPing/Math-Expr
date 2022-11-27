@@ -16,5 +16,10 @@ public enum TokenType {
     R_PAR,
 
     EQUALS,
-    FUNC_CALL
+    FUNC_CALL,
+    COMMA,
+
+    ADD,
+    SUB,
+
 }
