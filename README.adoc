@@ -1,0 +1,5 @@
+= Math-Lang
+
+Copyright &copy; Michael Steinmötzger 2022 (Licenced under GPL-3.0)
+
+WARNING: Project currently W.I.P
