@@ -21,5 +21,9 @@ public enum TokenType {
 
     ADD,
     SUB,
+    MULT,
+    DIV,
+    POW,
+    NOT_DEFINED
 
 }

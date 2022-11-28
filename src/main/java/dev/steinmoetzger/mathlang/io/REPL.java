@@ -11,6 +11,9 @@ import dev.steinmoetzger.mathlang.exceptions.MLCommandError;
 import dev.steinmoetzger.mathlang.exceptions.MLException;
 import dev.steinmoetzger.mathlang.io.commands.Command;
 import dev.steinmoetzger.mathlang.memory.Universe;
+import dev.steinmoetzger.mathlang.parser.Parser;
+import dev.steinmoetzger.mathlang.parser.ast.BinaryNode;
+import dev.steinmoetzger.mathlang.parser.ast.BinaryOperation;
 import dev.steinmoetzger.mathlang.parser.tokenizer.Tokenizer;
 
 import java.util.Arrays;
@@ -36,28 +39,27 @@ public class REPL {
         System.out.println("Welcome to MathLang by Michael Steinmötzger\nType 'help' for a list of all commands!");
         int clearNotice = 0;
 
-        while(scanner.hasNextLine()) {
+        while (scanner.hasNextLine()) {
             String line = scanner.nextLine().trim();
 
-            if(clearNotice > 20) {
+            if (clearNotice > 20) {
                 System.out.println("Tip: if you want to clear the screen use the 'clear' command! :)");
                 clearNotice = 0;
             }
-            if(line.isEmpty()) {
+            if (line.isEmpty()) {
                 clearNotice++;
                 continue;
             }
 
 
-
-            if(inputState == InputState.COMMAND) {
+            if (inputState == InputState.COMMAND) {
                 try {
                     this.validateCommand(line);
                 } catch (MLException e) {
                     System.out.println("An error occurred while executing input: " + e.getMessage());
                 }
-            } else if(inputState == InputState.CONSOLE) {
-                if(line.startsWith(".")) {
+            } else if (inputState == InputState.CONSOLE) {
+                if (line.startsWith(".")) {
                     try {
                         this.validateCommand(line.substring(1));
 
@@ -68,16 +70,12 @@ public class REPL {
                 }
 
 
+                Parser parser = new Parser(line);
+
                 try {
-                    Tokenizer tokenizer = new Tokenizer(line);
-                    System.out.println(tokenizer.next());
-                    System.out.println(tokenizer.next());
-                    System.out.println(tokenizer.next());
-
-
-
+                    parser.parse();
                 } catch (MLException e) {
-                    System.out.println("An error occurred while executing expression: " + e.getMessage());
+                    System.out.println("An error occurred while parsing expression: " + e.getMessage());
                 }
             }
         }
@@ -92,13 +90,13 @@ public class REPL {
         String[] args = cmd.split(" ");
         String command = args[0];
         args = Arrays.copyOfRange(args, 1, args.length);
-        if(!this.registeredCommands.containsKey(command.toLowerCase()))
+        if (!this.registeredCommands.containsKey(command.toLowerCase()))
             throw new MLException("Command '" + command + "' not found... type 'help' for help.");
 
         Command c = this.registeredCommands.get(command.toLowerCase());
 
         try {
-            c.execute(args, inputState==InputState.CONSOLE);
+            c.execute(args, inputState == InputState.CONSOLE);
         } catch (MLCommandError e) {
             throw new MLException("Command '" + command + "' threw error: " + e.getMessage());
         }
@@ -110,7 +108,7 @@ public class REPL {
     }
 
     public void toggleInputState() {
-        if(inputState == InputState.COMMAND) {
+        if (inputState == InputState.COMMAND) {
             inputState = InputState.CONSOLE;
             System.out.println("Input-mode console activated! Any input will be parsed as an mathematical expression.\nIn order to enter a command enter it like this: '.help'\nIn order to exit console mode type '.console'\n\n");
             Main.instance.getUniverseManager().setCurrentUniverse(Main.instance.getUniverseManager().registerUniverse());

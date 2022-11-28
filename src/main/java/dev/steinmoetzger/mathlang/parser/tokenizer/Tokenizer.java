@@ -36,9 +36,21 @@ public class Tokenizer {
     }
 
     private void initValidTokens() {
-        validCharTokens.put('(', TokenType.R_PAR);
-        validCharTokens.put(')', TokenType.L_PAR);
+        validCharTokens.put('(', TokenType.L_PAR);
+        validCharTokens.put(')', TokenType.R_PAR);
         validCharTokens.put(',', TokenType.COMMA);
+        validCharTokens.put('+', TokenType.ADD);
+        validCharTokens.put('*', TokenType.MULT);
+        validCharTokens.put('/', TokenType.DIV);
+        validCharTokens.put('^', TokenType.POW);
+        validCharTokens.put('-', TokenType.SUB);
+
+    }
+
+    public Token current() throws MLException {
+        Token t = next();
+        idx--;
+        return t;
     }
 
     public Token next() throws MLException {
@@ -49,8 +61,11 @@ public class Tokenizer {
             throw new MLException("Expected semicolon after expression.");
 
 
+
         String[] chars = string.split("");
 
+        if(idx == chars.length)
+            return new Token("0", TokenType.NOT_DEFINED);
         do {
             // when state is set to parse strings it should add every next char to cache until reached next
             // quotation mark, then it should pop the token with values {value="<cache_val>", type=STRING_LITERAL}
@@ -62,11 +77,14 @@ public class Tokenizer {
                     previous = current;
                     current = token;
                     idx++;
+                    state = TokenizerState.PARSE_ANYTHING;
                     return token;
                 }
                 cache.append(chars[idx]);
             }
 
+            // when state is set to PARSE_NUMBER or PARSE_NEG_NUMBER it checks if a digit or a decimal is present
+            // in order to parse negative numbers it multiplies by -1 when state is PARSE_NEG_NUMBER
             if(state == TokenizerState.PARSE_NUMBER || state == TokenizerState.PARSE_NEG_NUMBER) {
                 if(!(Character.isDigit(chars[idx].charAt(0)) || chars[idx].charAt(0) == '.')) {
                     token.setType(TokenType.NUMBER);
@@ -78,7 +96,7 @@ public class Tokenizer {
                         }
                         throw new MLException("given input cannot be parsed to valid number");
                     }
-
+                    state = TokenizerState.PARSE_ANYTHING;
                     previous = current;
                     current = token;
                     return token;
@@ -94,7 +112,8 @@ public class Tokenizer {
                 } else if(Character.isDigit(chars[idx].charAt(0))) {
                     state = TokenizerState.PARSE_NUMBER;
                     cache.append(chars[idx]);
-                } else if(chars[idx].charAt(0) == '-') {
+                } else if(chars[idx].charAt(0) == '-' && (idx > 0 && !Character.isDigit(chars[idx-1].charAt(0)) || idx == 0)) {
+                    // we check if current char is '-' AND if idx is greater than zero to catch an IOB Exception in next step
                     state = TokenizerState.PARSE_NEG_NUMBER;
                 } else if(chars[idx].charAt(0) != ' ' && chars[idx].charAt(0) != ';') {
 
@@ -105,6 +124,7 @@ public class Tokenizer {
                         previous = current;
                         current = token;
                         idx++;
+                        state = TokenizerState.PARSE_ANYTHING;
                         return token;
                     }
 
@@ -130,7 +150,7 @@ public class Tokenizer {
             idx++;
         } while (chars[idx-1].charAt(0) != ';');
 
-        return null;
+        return new Token("0", TokenType.NOT_DEFINED);
 
     }
 

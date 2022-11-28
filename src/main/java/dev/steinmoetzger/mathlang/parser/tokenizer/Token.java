@@ -11,6 +11,14 @@ public class Token {
     private String value;
     private TokenType type;
 
+    public Token() {
+    }
+
+
+    public Token(String value, TokenType type) {
+        this.value = value;
+        this.type = type;
+    }
 
     public String getValue() {
         return value;

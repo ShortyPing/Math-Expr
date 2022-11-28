@@ -7,16 +7,21 @@ stated in a license file.
 package dev.steinmoetzger.mathlang;
 
 import dev.steinmoetzger.mathlang.io.REPL;
+import dev.steinmoetzger.mathlang.io.commands.AstCommand;
 import dev.steinmoetzger.mathlang.io.commands.ClearCommand;
 import dev.steinmoetzger.mathlang.io.commands.ConsoleCommand;
 import dev.steinmoetzger.mathlang.io.commands.HelpCommand;
 import dev.steinmoetzger.mathlang.memory.UniverseManager;
+import dev.steinmoetzger.mathlang.parser.ast.BinaryNode;
+import dev.steinmoetzger.mathlang.parser.ast.BinaryOperation;
+import dev.steinmoetzger.mathlang.parser.ast.ImmediateNode;
 
 public class Main {
 
     public static Main instance;
     private REPL repl;
     private UniverseManager universeManager;
+    private boolean astDump;
 
     public Main() {
         instance = this;
@@ -31,6 +36,7 @@ public class Main {
         this.repl.registerCommand("help", new HelpCommand());
         this.repl.registerCommand("console", new ConsoleCommand());
         this.repl.registerCommand("clear", new ClearCommand());
+        this.repl.registerCommand("ast", new AstCommand());
     }
 
     public static void main(String[] args) {
@@ -45,5 +51,11 @@ public class Main {
         return universeManager;
     }
 
+    public boolean isAstDump() {
+        return astDump;
+    }
 
+    public void setAstDump(boolean astDump) {
+        this.astDump = astDump;
+    }
 }
