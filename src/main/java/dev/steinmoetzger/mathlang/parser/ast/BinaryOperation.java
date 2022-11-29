@@ -16,7 +16,7 @@ public enum BinaryOperation {
     POW,
     NOT_DEFINED;
 
-    public BinaryOperation fromToken(Token token) {
+    public static BinaryOperation fromToken(Token token) {
         return switch (token.getType()) {
             case ADD -> ADD;
             case DIV -> DIV;

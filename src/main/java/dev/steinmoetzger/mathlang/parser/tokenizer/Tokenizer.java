@@ -53,6 +53,14 @@ public class Tokenizer {
         return t;
     }
 
+    public Token getNext() throws MLException {
+        next();
+        Token t = next();
+        idx--;
+        idx--;
+        return t;
+    }
+
     public Token next() throws MLException {
         StringBuilder cache = new StringBuilder();
         Token token = new Token();
