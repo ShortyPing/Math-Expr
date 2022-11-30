@@ -14,6 +14,7 @@ import dev.steinmoetzger.mathlang.memory.Universe;
 import dev.steinmoetzger.mathlang.parser.Parser;
 import dev.steinmoetzger.mathlang.parser.ast.BinaryNode;
 import dev.steinmoetzger.mathlang.parser.ast.BinaryOperation;
+import dev.steinmoetzger.mathlang.parser.solve.Solver;
 import dev.steinmoetzger.mathlang.parser.tokenizer.Tokenizer;
 
 import java.util.Arrays;
@@ -71,9 +72,10 @@ public class REPL {
 
 
                 Parser parser = new Parser(line);
-
+                Solver solver = new Solver();
                 try {
-                    parser.parse();
+
+                    System.out.println("[=] " + solver.solve(parser.parse()));
                 } catch (MLException e) {
                     System.out.println("An error occurred while parsing expression: " + e.getMessage());
                 }

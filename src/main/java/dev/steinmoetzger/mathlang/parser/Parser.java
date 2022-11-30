@@ -24,7 +24,6 @@ public class Parser {
 
     public Node parse() throws MLException {
         Node baseNode;
-        System.out.println(tokenizer.current());
         if(tokenizer.current().getType() != TokenType.NUMBER &&
                 tokenizer.current().getType() != TokenType.L_PAR &&
                 tokenizer.current().getType() != TokenType.R_PAR) {
@@ -41,15 +40,15 @@ public class Parser {
 
     public Node parseStageOne() throws MLException {
         Node left = parseStageTwo();
-        tokenizer.next();
+
 
         if(tokenizer.getNext().getType() == TokenType.ADD || tokenizer.getNext().getType() == TokenType.SUB)
             this.tokenizer.next();
 
         while(tokenizer.current().getType() == TokenType.ADD || tokenizer.current().getType() == TokenType.SUB) {
             BinaryOperation operation = BinaryOperation.fromToken(tokenizer.current());
-            left = new BinaryNode(left, parseStageTwo(), operation);
 
+            this.tokenizer.next();
 
             if(this.tokenizer.current().getType() == TokenType.NOT_DEFINED)
                 throw new MLException("Expected valid expression.");
@@ -67,7 +66,10 @@ public class Parser {
         Node left = atomize();
 
 
-        if(this.tokenizer.current().getType() == TokenType.MULT || this.tokenizer.current().getType() == TokenType.DIV || this.tokenizer.current().getType() == TokenType.POW) {
+        if(this.tokenizer.getNext().getType() == TokenType.MULT || this.tokenizer.getNext().getType() == TokenType.DIV || this.tokenizer.getNext().getType() == TokenType.POW)
+            this.tokenizer.next();
+
+        while(this.tokenizer.current().getType() == TokenType.MULT || this.tokenizer.current().getType() == TokenType.DIV || this.tokenizer.current().getType() == TokenType.POW) {
             BinaryOperation operation = BinaryOperation.fromToken(tokenizer.current());
 
             this.tokenizer.next();
@@ -88,13 +90,13 @@ public class Parser {
     }
 
     private Node atomize() throws MLException {
-        if(tokenizer.current().getType() == TokenType.NUMBER) {
-            Node n = new ImmediateNode(Double.parseDouble(tokenizer.current().getValue()));
-            return n;
-        }
+        if(tokenizer.current().getType() == TokenType.NUMBER)
+            return new ImmediateNode(Double.parseDouble(tokenizer.current().getValue()));
+
         if(tokenizer.current().getType() == TokenType.L_PAR) {
             this.tokenizer.next();
             Node e = parseStageOne();
+            this.tokenizer.next();
             if(tokenizer.current().getType() != TokenType.R_PAR)
                 throw new MLException("Expected closed parenthese");
             return e;

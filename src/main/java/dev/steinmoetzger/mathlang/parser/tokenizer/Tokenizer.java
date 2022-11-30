@@ -6,9 +6,13 @@ stated in a license file.
 
 package dev.steinmoetzger.mathlang.parser.tokenizer;
 
+import com.ibm.icu.text.RuleBasedNumberFormat;
 import dev.steinmoetzger.mathlang.exceptions.MLException;
+import org.apache.commons.lang3.StringUtils;
 
+import java.text.NumberFormat;
 import java.util.HashMap;
+import java.util.Locale;
 
 public class Tokenizer {
 
@@ -48,8 +52,9 @@ public class Tokenizer {
     }
 
     public Token current() throws MLException {
+        int cIdx = idx;
         Token t = next();
-        idx--;
+        idx-=(idx - cIdx);
         return t;
     }
 
@@ -100,7 +105,10 @@ public class Tokenizer {
                         token.setValue(String.valueOf(Double.parseDouble(cache.toString()) * (state==TokenizerState.PARSE_NEG_NUMBER?(-1):1)));
                     } catch (NumberFormatException e) {
                         if(e.getMessage().equalsIgnoreCase("multiple points")) {
-                            throw new MLException("cannot have more than one decimal points in number");
+                            int count = StringUtils.countMatches(cache.toString(), ".");
+                            RuleBasedNumberFormat format = new RuleBasedNumberFormat(new Locale("de"), RuleBasedNumberFormat.SPELLOUT);
+
+                            throw new MLException("Cannot have " + format.format(count) + " commas in number.");
                         }
                         throw new MLException("given input cannot be parsed to valid number");
                     }

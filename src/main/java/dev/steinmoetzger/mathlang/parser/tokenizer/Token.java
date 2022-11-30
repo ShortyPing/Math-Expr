@@ -10,6 +10,7 @@ public class Token {
 
     private String value;
     private TokenType type;
+    private int idxLength;
 
     public Token() {
     }
@@ -18,6 +19,12 @@ public class Token {
     public Token(String value, TokenType type) {
         this.value = value;
         this.type = type;
+    }
+
+    public Token(String value, TokenType type, int idxLength) {
+        this.value = value;
+        this.type = type;
+        this.idxLength = idxLength;
     }
 
     public String getValue() {
@@ -34,6 +41,14 @@ public class Token {
 
     public void setType(TokenType type) {
         this.type = type;
+    }
+
+    public int getIdxLength() {
+        return idxLength;
+    }
+
+    public void setIdxLength(int idxLength) {
+        this.idxLength = idxLength;
     }
 
     @Override
