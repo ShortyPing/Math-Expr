@@ -24,6 +24,8 @@ public enum TokenType {
     MULT,
     DIV,
     POW,
-    NOT_DEFINED
+    NOT_DEFINED,
+
+    KEYWORD_UNDEF
 
 }

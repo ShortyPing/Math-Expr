@@ -18,9 +18,7 @@ import dev.steinmoetzger.mathlang.parser.ast.BinaryOperation;
 import dev.steinmoetzger.mathlang.parser.solve.Solver;
 import dev.steinmoetzger.mathlang.parser.tokenizer.Tokenizer;
 
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.Scanner;
+import java.util.*;
 
 public class REPL {
 

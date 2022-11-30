@@ -30,12 +30,14 @@ public class Tokenizer {
     private Token current;
     private Token previous;
     private HashMap<Character, TokenType> validCharTokens;
+    private HashMap<String, TokenType> validStringTokens;
 
     public Tokenizer(String string) {
         this.string = string;
         this.idx = 0;
         this.state = TokenizerState.PARSE_ANYTHING;
         this.validCharTokens = new HashMap<>();
+        this.validStringTokens = new HashMap<>();
         this.initValidTokens();
     }
 
@@ -50,6 +52,8 @@ public class Tokenizer {
         validCharTokens.put('-', TokenType.SUB);
         validCharTokens.put('=', TokenType.EQUALS);
 
+
+        validStringTokens.put("undef", TokenType.KEYWORD_UNDEF);
     }
 
     public Token current() throws MLException {
@@ -153,7 +157,10 @@ public class Tokenizer {
             if(state == TokenizerState.PARSE_IDENTIFIER) {
                 if(!Character.isLetter(chars[idx].charAt(0))) {
                     token.setValue(cache.toString());
+
                     token.setType(TokenType.IDENTIFIER);
+                    if(validStringTokens.containsKey(cache.toString()))
+                        token.setType(validStringTokens.get(cache.toString()));
                     previous = current;
                     current = token;
                     state = TokenizerState.PARSE_ANYTHING;

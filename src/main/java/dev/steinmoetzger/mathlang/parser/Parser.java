@@ -27,35 +27,52 @@ public class Parser {
     public Node parse() throws MLException, MLSolveException {
         Node baseNode;
 
-        if(tokenizer.current().getType() == TokenType.IDENTIFIER && tokenizer.getNext().getType() == TokenType.EQUALS) {
+        if (tokenizer.current().getType() == TokenType.IDENTIFIER && tokenizer.getNext().getType() == TokenType.EQUALS) {
             return parseVariable();
         }
 
-        if(tokenizer.current().getType() == TokenType.IDENTIFIER && tokenizer.getNext().getType() == TokenType.NOT_DEFINED) {
+        if (tokenizer.current().getType() == TokenType.IDENTIFIER && tokenizer.getNext().getType() == TokenType.NOT_DEFINED) {
             return parseGetVariable();
+        }
+        if(tokenizer.current().getType() == TokenType.KEYWORD_UNDEF) {
+            return parseUndef();
         }
 
         baseNode = parseStageOne();
 
-        if(Main.instance.isAstDump())
+        if (Main.instance.isAstDump())
             System.out.println(baseNode.print(0));
 
         return baseNode;
     }
 
+
+    public Node parseUndef() throws MLException {
+        this.tokenizer.next();
+        String name = this.tokenizer.current().getValue();
+        System.out.println(name);
+        if(!Main.instance.getUniverseManager().getCurrentUniverse().getDefinedVariables().containsKey(name))
+            throw new MLException("Expected defined variable on undef command.");
+        Main.instance.getUniverseManager().getCurrentUniverse().getDefinedVariables().remove(name);
+        System.out.println("Undefined Variable (" + name + ")");
+
+        return new ImmediateNode(0);
+    }
+
     public Node parseGetVariable() throws MLException {
         String name = this.tokenizer.current().getValue();
 
-        if(!Main.instance.getUniverseManager().getCurrentUniverse().getDefinedVariables().containsKey(name))
+        if (!Main.instance.getUniverseManager().getCurrentUniverse().getDefinedVariables().containsKey(name))
             throw new MLException("Invalid expression or undefined variable");
 
         return new ImmediateNode(Main.instance.getUniverseManager().getCurrentUniverse().getDefinedVariables().get(name));
     }
+
     public Node parseVariable() throws MLException, MLSolveException {
         String name = this.tokenizer.current().getValue();
         this.tokenizer.next();
         this.tokenizer.next();
-        if(this.tokenizer.current().getType() == TokenType.NOT_DEFINED)
+        if (this.tokenizer.current().getType() == TokenType.NOT_DEFINED)
             throw new MLException("Value expected");
 
         Node value = parseStageOne();
@@ -69,21 +86,21 @@ public class Parser {
         Node left = parseStageTwo();
 
 
-        if(tokenizer.getNext().getType() == TokenType.ADD || tokenizer.getNext().getType() == TokenType.SUB)
+        if (tokenizer.getNext().getType() == TokenType.ADD || tokenizer.getNext().getType() == TokenType.SUB)
             this.tokenizer.next();
 
-        while(tokenizer.current().getType() == TokenType.ADD || tokenizer.current().getType() == TokenType.SUB) {
+        while (tokenizer.current().getType() == TokenType.ADD || tokenizer.current().getType() == TokenType.SUB) {
             BinaryOperation operation = BinaryOperation.fromToken(tokenizer.current());
 
             this.tokenizer.next();
 
-            if(this.tokenizer.current().getType() == TokenType.NOT_DEFINED)
+            if (this.tokenizer.current().getType() == TokenType.NOT_DEFINED)
                 throw new MLException("Expected valid expression.");
 
             Node right = parseStageTwo();
             left = new BinaryNode(left, right, operation);
 
-            if(tokenizer.getNext().getType() == TokenType.ADD || tokenizer.getNext().getType() == TokenType.SUB)
+            if (tokenizer.getNext().getType() == TokenType.ADD || tokenizer.getNext().getType() == TokenType.SUB)
                 this.tokenizer.next();
         }
         return left;
@@ -93,21 +110,21 @@ public class Parser {
         Node left = atomize();
 
 
-        if(this.tokenizer.getNext().getType() == TokenType.MULT || this.tokenizer.getNext().getType() == TokenType.DIV || this.tokenizer.getNext().getType() == TokenType.POW)
+        if (this.tokenizer.getNext().getType() == TokenType.MULT || this.tokenizer.getNext().getType() == TokenType.DIV || this.tokenizer.getNext().getType() == TokenType.POW)
             this.tokenizer.next();
 
-        while(this.tokenizer.current().getType() == TokenType.MULT || this.tokenizer.current().getType() == TokenType.DIV || this.tokenizer.current().getType() == TokenType.POW) {
+        while (this.tokenizer.current().getType() == TokenType.MULT || this.tokenizer.current().getType() == TokenType.DIV || this.tokenizer.current().getType() == TokenType.POW) {
             BinaryOperation operation = BinaryOperation.fromToken(tokenizer.current());
 
             this.tokenizer.next();
 
-            if(this.tokenizer.current().getType() == TokenType.NOT_DEFINED)
+            if (this.tokenizer.current().getType() == TokenType.NOT_DEFINED)
                 throw new MLException("Expected valid expression.");
 
             Node right = atomize();
             left = new BinaryNode(left, right, operation);
 
-            if(this.tokenizer.getNext().getType() == TokenType.MULT || this.tokenizer.getNext().getType() == TokenType.DIV || this.tokenizer.getNext().getType() == TokenType.POW) {
+            if (this.tokenizer.getNext().getType() == TokenType.MULT || this.tokenizer.getNext().getType() == TokenType.DIV || this.tokenizer.getNext().getType() == TokenType.POW) {
                 this.tokenizer.next();
             }
 
@@ -117,17 +134,17 @@ public class Parser {
     }
 
     private Node atomize() throws MLException {
-        if(tokenizer.current().getType() == TokenType.NUMBER)
+        if (tokenizer.current().getType() == TokenType.NUMBER)
             return new ImmediateNode(Double.parseDouble(tokenizer.current().getValue()));
-        if(tokenizer.current().getType() == TokenType.IDENTIFIER) {
+        if (tokenizer.current().getType() == TokenType.IDENTIFIER) {
             return parseGetVariable();
         }
 
-        if(tokenizer.current().getType() == TokenType.L_PAR) {
+        if (tokenizer.current().getType() == TokenType.L_PAR) {
             this.tokenizer.next();
             Node e = parseStageOne();
             this.tokenizer.next();
-            if(tokenizer.current().getType() != TokenType.R_PAR)
+            if (tokenizer.current().getType() != TokenType.R_PAR)
                 throw new MLException("Expected closed parenthese");
             return e;
         }

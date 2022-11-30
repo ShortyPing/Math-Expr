@@ -7,10 +7,7 @@ stated in a license file.
 package dev.steinmoetzger.mathlang;
 
 import dev.steinmoetzger.mathlang.io.REPL;
-import dev.steinmoetzger.mathlang.io.commands.AstCommand;
-import dev.steinmoetzger.mathlang.io.commands.ClearCommand;
-import dev.steinmoetzger.mathlang.io.commands.ConsoleCommand;
-import dev.steinmoetzger.mathlang.io.commands.HelpCommand;
+import dev.steinmoetzger.mathlang.io.commands.*;
 import dev.steinmoetzger.mathlang.memory.UniverseManager;
 import dev.steinmoetzger.mathlang.parser.ast.BinaryNode;
 import dev.steinmoetzger.mathlang.parser.ast.BinaryOperation;
@@ -37,6 +34,7 @@ public class Main {
         this.repl.registerCommand("console", new ConsoleCommand());
         this.repl.registerCommand("clear", new ClearCommand());
         this.repl.registerCommand("ast", new AstCommand());
+        this.repl.registerCommand("universe", new UniverseCommand());
     }
 
     public static void main(String[] args) {
@@ -58,4 +56,6 @@ public class Main {
     public void setAstDump(boolean astDump) {
         this.astDump = astDump;
     }
+
+
 }
