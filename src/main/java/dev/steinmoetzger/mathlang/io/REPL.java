@@ -9,6 +9,7 @@ package dev.steinmoetzger.mathlang.io;
 import dev.steinmoetzger.mathlang.Main;
 import dev.steinmoetzger.mathlang.exceptions.MLCommandError;
 import dev.steinmoetzger.mathlang.exceptions.MLException;
+import dev.steinmoetzger.mathlang.exceptions.MLSolveException;
 import dev.steinmoetzger.mathlang.io.commands.Command;
 import dev.steinmoetzger.mathlang.memory.Universe;
 import dev.steinmoetzger.mathlang.parser.Parser;
@@ -78,6 +79,8 @@ public class REPL {
                     System.out.println("[=] " + solver.solve(parser.parse()));
                 } catch (MLException e) {
                     System.out.println("An error occurred while parsing expression: " + e.getMessage());
+                } catch (MLSolveException e) {
+                    System.out.println("An error occurred while solving expression: " + e.getMessage());
                 }
             }
         }

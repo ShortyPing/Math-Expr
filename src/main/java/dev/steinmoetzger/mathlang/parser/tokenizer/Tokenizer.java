@@ -48,6 +48,7 @@ public class Tokenizer {
         validCharTokens.put('/', TokenType.DIV);
         validCharTokens.put('^', TokenType.POW);
         validCharTokens.put('-', TokenType.SUB);
+        validCharTokens.put('=', TokenType.EQUALS);
 
     }
 
@@ -150,14 +151,13 @@ public class Tokenizer {
 
             }
             if(state == TokenizerState.PARSE_IDENTIFIER) {
-                if(chars[idx].charAt(0) == ' ' || chars[idx].charAt(0) == ';' || chars[idx].charAt(0) == ',') {
+                if(!Character.isLetter(chars[idx].charAt(0))) {
                     token.setValue(cache.toString());
                     token.setType(TokenType.IDENTIFIER);
                     previous = current;
                     current = token;
                     state = TokenizerState.PARSE_ANYTHING;
-                    if(idx < chars.length-1 && chars[idx].charAt(0) != ',')
-                        idx++;
+
                     return token;
                 }
                 cache.append(chars[idx]);

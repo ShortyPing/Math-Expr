@@ -7,10 +7,12 @@ package dev.steinmoetzger.mathlang.parser;
 
 import dev.steinmoetzger.mathlang.Main;
 import dev.steinmoetzger.mathlang.exceptions.MLException;
+import dev.steinmoetzger.mathlang.exceptions.MLSolveException;
 import dev.steinmoetzger.mathlang.parser.ast.BinaryNode;
 import dev.steinmoetzger.mathlang.parser.ast.BinaryOperation;
 import dev.steinmoetzger.mathlang.parser.ast.ImmediateNode;
 import dev.steinmoetzger.mathlang.parser.ast.Node;
+import dev.steinmoetzger.mathlang.parser.solve.Solver;
 import dev.steinmoetzger.mathlang.parser.tokenizer.TokenType;
 import dev.steinmoetzger.mathlang.parser.tokenizer.Tokenizer;
 
@@ -22,20 +24,45 @@ public class Parser {
         this.tokenizer = new Tokenizer(s);
     }
 
-    public Node parse() throws MLException {
+    public Node parse() throws MLException, MLSolveException {
         Node baseNode;
-        if(tokenizer.current().getType() != TokenType.NUMBER &&
-                tokenizer.current().getType() != TokenType.L_PAR &&
-                tokenizer.current().getType() != TokenType.R_PAR) {
-            throw new MLException("Expected math expression [functions not supported (yet)]");
+
+        if(tokenizer.current().getType() == TokenType.IDENTIFIER && tokenizer.getNext().getType() == TokenType.EQUALS) {
+            return parseVariable();
         }
+
+        if(tokenizer.current().getType() == TokenType.IDENTIFIER && tokenizer.getNext().getType() == TokenType.NOT_DEFINED) {
+            return parseGetVariable();
+        }
+
         baseNode = parseStageOne();
 
         if(Main.instance.isAstDump())
             System.out.println(baseNode.print(0));
 
         return baseNode;
+    }
 
+    public Node parseGetVariable() throws MLException {
+        String name = this.tokenizer.current().getValue();
+
+        if(!Main.instance.getUniverseManager().getCurrentUniverse().getDefinedVariables().containsKey(name))
+            throw new MLException("Invalid expression or undefined variable");
+
+        return new ImmediateNode(Main.instance.getUniverseManager().getCurrentUniverse().getDefinedVariables().get(name));
+    }
+    public Node parseVariable() throws MLException, MLSolveException {
+        String name = this.tokenizer.current().getValue();
+        this.tokenizer.next();
+        this.tokenizer.next();
+        if(this.tokenizer.current().getType() == TokenType.NOT_DEFINED)
+            throw new MLException("Value expected");
+
+        Node value = parseStageOne();
+        double solved = new Solver().solve(value);
+        Main.instance.getUniverseManager().getCurrentUniverse().getDefinedVariables().put(name, solved);
+        System.out.println("Variable Definition (" + name + " -> " + solved + ")");
+        return new ImmediateNode(solved);
     }
 
     public Node parseStageOne() throws MLException {
@@ -92,6 +119,9 @@ public class Parser {
     private Node atomize() throws MLException {
         if(tokenizer.current().getType() == TokenType.NUMBER)
             return new ImmediateNode(Double.parseDouble(tokenizer.current().getValue()));
+        if(tokenizer.current().getType() == TokenType.IDENTIFIER) {
+            return parseGetVariable();
+        }
 
         if(tokenizer.current().getType() == TokenType.L_PAR) {
             this.tokenizer.next();
