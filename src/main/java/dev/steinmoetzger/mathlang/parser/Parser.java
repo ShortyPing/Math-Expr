@@ -107,13 +107,40 @@ public class Parser {
     }
 
     public Node parseStageTwo() throws MLException {
+        Node left = parseStageThree();
+
+
+        if (this.tokenizer.getNext().getType() == TokenType.MULT || this.tokenizer.getNext().getType() == TokenType.DIV)
+            this.tokenizer.next();
+
+        while (this.tokenizer.current().getType() == TokenType.MULT || this.tokenizer.current().getType() == TokenType.DIV) {
+            BinaryOperation operation = BinaryOperation.fromToken(tokenizer.current());
+
+            this.tokenizer.next();
+
+            if (this.tokenizer.current().getType() == TokenType.NOT_DEFINED)
+                throw new MLException("Expected valid expression.");
+
+            Node right = parseStageThree();
+            left = new BinaryNode(left, right, operation);
+
+            if (this.tokenizer.getNext().getType() == TokenType.MULT || this.tokenizer.getNext().getType() == TokenType.DIV) {
+                this.tokenizer.next();
+            }
+
+
+        }
+        return left;
+    }
+
+    public Node parseStageThree() throws MLException {
         Node left = atomize();
 
 
-        if (this.tokenizer.getNext().getType() == TokenType.MULT || this.tokenizer.getNext().getType() == TokenType.DIV || this.tokenizer.getNext().getType() == TokenType.POW)
+        if (this.tokenizer.getNext().getType() == TokenType.POW)
             this.tokenizer.next();
 
-        while (this.tokenizer.current().getType() == TokenType.MULT || this.tokenizer.current().getType() == TokenType.DIV || this.tokenizer.current().getType() == TokenType.POW) {
+        while (this.tokenizer.current().getType() == TokenType.POW) {
             BinaryOperation operation = BinaryOperation.fromToken(tokenizer.current());
 
             this.tokenizer.next();
@@ -124,7 +151,7 @@ public class Parser {
             Node right = atomize();
             left = new BinaryNode(left, right, operation);
 
-            if (this.tokenizer.getNext().getType() == TokenType.MULT || this.tokenizer.getNext().getType() == TokenType.DIV || this.tokenizer.getNext().getType() == TokenType.POW) {
+            if (this.tokenizer.getNext().getType() == TokenType.POW) {
                 this.tokenizer.next();
             }
 
